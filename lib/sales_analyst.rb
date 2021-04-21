@@ -19,80 +19,7 @@ class SalesAnalyst
     @invoice_items ||= engine.get_all_invoice_items
   end
 
-  def get_merchant_ids(merchants)
-    merchants.map do |merchant|
-      merchant.id
-    end
-  end
-
-  def average_items_per_merchant
-    Compute.mean(engine.items_per_merchant.sum, engine.items_per_merchant.length)
-  end
-
-  def average_items_per_merchant_standard_deviation
-    Compute.standard_deviation(engine.items_per_merchant)
-  end
-
-  def merchants_with_high_item_count
-    mean = average_items_per_merchant
-    greater_than_1sd = mean + average_items_per_merchant_standard_deviation
-    merchants.find_all do |merchant|
-      engine.find_all_items_by_merchant_id(merchant.id).length > greater_than_1sd
-    end
-  end
-
-  def total_item_price(items)
-    items.sum do |item_object|
-      item_object.unit_price
-    end
-  end
-
-  def average_item_price_for_merchant(merchant_id)
-    merchant_items = @engine.find_all_items_by_merchant_id(merchant_id)
-    if merchant_items.length != 0
-      Compute.mean(total_item_price(merchant_items), merchant_items.length)
-    else
-      0
-    end
-  end
-
-  def average_average_price_per_merchant
-    items_sum = merchants.sum do |merchant|
-      average_item_price_for_merchant(merchant.id)
-    end
-    Compute.mean(items_sum, merchants.length)
-  end
-
-  def average_price_per_item_standard_deviation
-    Compute.standard_deviation(engine.price_per_item)
-  end
-
-  def golden_items
-    mean = Compute.mean(total_item_price(items), items.length)
-    two_sd = average_price_per_item_standard_deviation * 2
-    greater_than_2sd = mean + two_sd
-    items.find_all do |item_object|
-      item_object.unit_price >= greater_than_2sd
-    end
-  end
-
-  def average_invoices_per_merchant
-    Compute.mean(engine.invoices_per_merchant.sum, engine.invoices_per_merchant.length)
-  end
-
-  def average_invoices_per_merchant_standard_deviation
-    Compute.standard_deviation(engine.invoices_per_merchant)
-  end
-
-  def average_invoices_per_day_standard_deviation
-    Compute.standard_deviation(engine.invoices_per_day)
-    # average_invoices_per_day = Compute.mean(invoices.length, 7)
-    # adder_counter = engine.invoices_per_day.values.sum do |number_of_invoices|
-    #   (number_of_invoices - average_invoices_per_day)**2
-    # end
-    # Math.sqrt(adder_counter.to_f / 6).round(2)
-  end
-
+  ###### INVOICES AND REVENUE #######
   def top_days_by_invoice_count
     days_hash = engine.invoices_per_day.select do |key, value|
       value > average_invoices_per_day_standard_deviation + (invoices.length/7)
@@ -102,9 +29,9 @@ class SalesAnalyst
 
   def invoice_status(status_symbol)
     sorted_invoices = []
-     @invoices.each do |invoice|
-       if invoice.status == status_symbol
-      sorted_invoices.push(invoice)
+    @invoices.each do |invoice|
+      if invoice.status == status_symbol
+        sorted_invoices.push(invoice)
       end
     end
     (sorted_invoices.length/@invoices.length.to_f*100).round(2)
@@ -130,6 +57,36 @@ class SalesAnalyst
       end
     else
       false
+    end
+  end
+
+  def golden_items
+    mean = Compute.mean(total_item_price(items), items.length)
+    two_sd = average_price_per_item_standard_deviation * 2
+    greater_than_2sd = mean + two_sd
+    items.find_all do |item_object|
+      item_object.unit_price >= greater_than_2sd
+    end
+  end
+
+  def total_revenue_by_date(date)
+    invoice_id_matching_date = 0
+    @invoices.each do |invoice|
+      if invoice.created_at == date
+        invoice_id_matching_date += invoice.id
+      end
+      invoice_id_matching_date
+      invoices_total_by_date = invoice_total(invoice_id_matching_date)
+      return invoices_total_by_date
+    end
+  end
+
+  ###### MERCHANT ANALYTICS #######
+  def merchants_with_high_item_count
+    mean = average_items_per_merchant
+    greater_than_1sd = mean + average_items_per_merchant_standard_deviation
+    merchants.find_all do |merchant|
+      engine.find_all_items_by_merchant_id(merchant.id).length > greater_than_1sd
     end
   end
 
@@ -173,24 +130,16 @@ class SalesAnalyst
     end
   end
 
-  def total_revenue_by_date(date)
-    invoice_id_matching_date = 0
-    @invoices.each do |invoice|
-      if invoice.created_at == date
-        invoice_id_matching_date += invoice.id
-      end
-      invoice_id_matching_date
-      invoices_total_by_date = invoice_total(invoice_id_matching_date)
-      return invoices_total_by_date
+  def merchants_with_only_one_item_registered_in_month(month)
+    merchants_with_only_one_item.find_all do |merchant|
+      merchant.created_at.strftime('%B') == month
     end
   end
 
-  def check_pending_invoice(invoice)
-    transactions = engine.find_transactions_by_invoice_id(invoice.id)
-    failed_transactions = transactions.none? do |transaction|
-      transaction.result == :success
+  def merchants_with_only_one_item
+    @merchants.find_all do |merchant|
+      @engine.find_all_items_by_merchant_id(merchant.id).length == 1
     end
-    failed_transactions
   end
 
   def merchants_with_pending_invoices
@@ -202,15 +151,65 @@ class SalesAnalyst
     end
   end
 
-  def merchants_with_only_one_item_registered_in_month(month)
-    merchants_with_only_one_item.find_all do |merchant|
-      merchant.created_at.strftime('%B') == month
+  ###### AVERAGES AND STD DEVIATION #######
+  def average_items_per_merchant
+    Compute.mean(engine.items_per_merchant.sum, engine.items_per_merchant.length)
+  end
+
+  def average_item_price_for_merchant(merchant_id)
+    merchant_items = @engine.find_all_items_by_merchant_id(merchant_id)
+    if merchant_items.length != 0
+      Compute.mean(total_item_price(merchant_items), merchant_items.length)
+    else
+      0
     end
   end
 
-  def merchants_with_only_one_item
-    @merchants.find_all do |merchant|
-      @engine.find_all_items_by_merchant_id(merchant.id).length == 1
+  def average_average_price_per_merchant
+    items_sum = merchants.sum do |merchant|
+      average_item_price_for_merchant(merchant.id)
     end
+    Compute.mean(items_sum, merchants.length)
+  end
+
+  def average_items_per_merchant_standard_deviation
+    Compute.standard_deviation(engine.items_per_merchant)
+  end
+
+  def average_price_per_item_standard_deviation
+    Compute.standard_deviation(engine.price_per_item)
+  end
+
+  def average_invoices_per_merchant
+    Compute.mean(engine.invoices_per_merchant.sum, engine.invoices_per_merchant.length)
+  end
+
+  def average_invoices_per_merchant_standard_deviation
+    Compute.standard_deviation(engine.invoices_per_merchant)
+  end
+
+  def average_invoices_per_day_standard_deviation
+    Compute.standard_deviation(engine.invoices_per_day)
+  end
+
+  ###### HELPER METHODS #######
+  def get_merchant_ids(merchants)
+    merchants.map do |merchant|
+      merchant.id
+    end
+  end
+
+  def total_item_price(items)
+    items.sum do |item_object|
+      item_object.unit_price
+    end
+  end
+
+  def check_pending_invoice(invoice)
+    transactions = engine.find_transactions_by_invoice_id(invoice.id)
+    failed_transactions = transactions.none? do |transaction|
+      transaction.result == :success
+    end
+    failed_transactions
   end
 end
