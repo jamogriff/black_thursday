@@ -145,29 +145,6 @@ class SalesAnalyst
     end
   end
 
-  def invoice_paid_in_full?(invoice_id)
-    all_transactions = @transactions.find_all do |transaction|
-      transaction.invoice_id == invoice_id
-    end
-    if all_transactions.length != 0
-      all_transactions.any? do |transaction|
-        transaction.result == :success
-      end
-    else
-      false
-    end
-  end
-
-  # def invoice_total(invoice_id)
-  #   all_invoice_items = @invoice_items.find_all do |invoice_item|
-  #     invoice_item.invoice_id == invoice_id &&
-  #     invoice_paid_in_full?(invoice_item.invoice_id)
-  #   end
-  #   all_invoice_items.sum do |invoice_item|
-  #     (invoice_item.quantity * invoice_item.unit_price)
-  #   end
-  # end
-
   def revenue_by_merchant(merchant_id)
     merchant_invoices = find_all_invoices_by_merchant_id(merchant_id)
     merchant_invoices.sum do |invoice|
@@ -227,14 +204,14 @@ class SalesAnalyst
     end
   end
 
-  def merchants_with_only_one_item
-    one_item_merchants = items_per_merchant_hash.select do |key, value|
-      value == 1
-    end
-    final = @merchants.select do |merchant|
-      one_item_merchants.keys.include?(merchant.id)
-    end
-  end
+  # def merchants_with_only_one_item
+  #   one_item_merchants = items_per_merchant_hash.select do |key, value|
+  #     value == 1
+  #   end
+  #   final = @merchants.select do |merchant|
+  #     one_item_merchants.keys.include?(merchant.id)
+  #   end
+  # end
 
   def merchants_with_only_one_item_registered_in_month(month)
     merchants_selling_only_one_item.find_all do |merchant|
@@ -244,8 +221,7 @@ class SalesAnalyst
 
   def merchants_selling_only_one_item
     @merchants.find_all do |merchant|
-      merchants_items = @engine.find_all_items_by_merchant_id(merchant.id)
-      merchants_items.length == 1
+      @engine.find_all_items_by_merchant_id(merchant.id).length == 1
     end
   end
 end

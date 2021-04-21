@@ -60,5 +60,18 @@ RSpec.describe SalesEngine do
     it 'gets all transactions' do
       expect(sales_engine.get_all_transactions[1]).to be_an_instance_of(Transaction)
     end
+
+    it '#invoice_paid_in_full? returns true if invoice is paid in full' do
+      expect(sales_engine.invoice_paid_in_full?(1)).to eq(true)
+      expect(sales_engine.invoice_paid_in_full?(200)).to eq(true)
+      expect(sales_engine.invoice_paid_in_full?(203)).to eq(false)
+      expect(sales_engine.invoice_paid_in_full?(204)).to eq(false)
+    end
+
+    it '#invoice_total returns total dollar amount of invoice by id IF the invoice is paid in full' do
+      expect(sales_engine.invoice_total(1)).to eq(21067.77)
+      expect(sales_engine.invoice_total(1).class).to eq(BigDecimal)
+      expect(sales_engine.invoice_total(2)).to eq(5289.13)
+    end
   end
 end
