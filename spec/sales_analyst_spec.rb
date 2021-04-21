@@ -153,19 +153,16 @@ RSpec.describe do
 
     it '#invoice_total returns total dollar amount of invoice by id IF the invoice is paid in full' do
 
-      expect(sales_analyst.invoice_total(1)).to eq(21067.77)
-      expect(sales_analyst.invoice_total(1).class).to eq(BigDecimal)
-      expect(sales_analyst.invoice_total(2)).to eq(5289.13)
+      expect(sales_engine.invoice_total(1)).to eq(21067.77)
+      expect(sales_engine.invoice_total(1).class).to eq(BigDecimal)
+      expect(sales_engine.invoice_total(2)).to eq(5289.13)
     end
   end
 
   describe 'AM iteration 4 functionality: revenue_by_merchant + top_revenue_earners' do
     sales_engine = SalesEngine.from_csv({
-                                        :items     => "./data/items.csv",
-                                        # :merchants => "./spec/fixtures/merchants_fixtures.csv",
-                                        :merchants => "./data/merchants.csv",
+                                        :items     => "./data/items.csv",                                        :merchants => "./data/merchants.csv",
                                         :invoices => "./data/invoices.csv",
-                                        # :invoice_items => "./spec/fixtures/invoice_items_fixtures.csv",
                                         :invoice_items => "./data/invoice_items.csv",
                                         :transactions => "./data/transactions.csv",
                                         :customers => "./data/customers.csv"

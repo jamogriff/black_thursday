@@ -17,13 +17,13 @@ class SalesEngine
               :analyst
 
   def initialize(csv_data)
-    @merchants = MerchantRepository.new(csv_data[:merchants])
-    @items = ItemRepository.new(csv_data[:items])
-    @invoices = InvoiceRepository.new(csv_data[:invoices])
-    @invoice_items = InvoiceItemRepository.new(csv_data[:invoice_items])
-    @customers = CustomerRepository.new(csv_data[:customers])
-    @transactions = TransactionRepository.new(csv_data[:transactions])
-    @analyst = SalesAnalyst.new(self)
+    @merchants ||= MerchantRepository.new(csv_data[:merchants])
+    @items ||= ItemRepository.new(csv_data[:items])
+    @invoices ||= InvoiceRepository.new(csv_data[:invoices])
+    @invoice_items ||= InvoiceItemRepository.new(csv_data[:invoice_items])
+    @customers ||= CustomerRepository.new(csv_data[:customers])
+    @transactions ||= TransactionRepository.new(csv_data[:transactions])
+    @analyst ||= SalesAnalyst.new(self)
   end
 
   def self.from_csv(csv_data)
@@ -59,6 +59,41 @@ class SalesEngine
   def find_all_items_by_merchant_id(merchant_id)
     @items.array_of_objects.find_all do |item_object|
       item_object.merchant_id == merchant_id
+    end
+  end
+
+  def invoices_per_day
+    days = @invoices.array_of_objects.map do |invoice_object|
+      invoice_object.created_at.strftime('%A')
+    end
+    sorted_days = days.group_by do |day|
+      day
+    end
+    sorted_days.transform_values do |value|
+      value.length
+    end
+  end
+
+  def invoice_total(invoice_id)
+    all_invoice_items = @invoice_items.array_of_objects.find_all do |invoice_item|
+      invoice_item.invoice_id == invoice_id &&
+      invoice_paid_in_full?(invoice_item.invoice_id)
+    end
+    all_invoice_items.sum do |invoice_item|
+      (invoice_item.quantity * invoice_item.unit_price)
+    end
+  end
+
+  def invoice_paid_in_full?(invoice_id)
+    all_transactions = @transactions.array_of_objects.find_all do |transaction|
+      transaction.invoice_id == invoice_id
+    end
+    if all_transactions.length != 0
+      all_transactions.any? do |transaction|
+        transaction.result == :success
+      end
+    else
+      false
     end
   end
 end

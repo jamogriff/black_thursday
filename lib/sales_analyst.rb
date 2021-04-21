@@ -3,17 +3,19 @@ require 'date'
 
 class SalesAnalyst
 
-  attr_reader :engine, :merchants,
-              :items, :invoices,
+  attr_reader :engine,
+              :merchants,
+              :items,
+              :invoices,
               :transactions
 
   def initialize(engine)
     @engine = engine
-    @merchants = engine.get_all_merchants
-    @items = engine.get_all_items
-    @invoices = engine.get_all_invoices
-    @transactions = engine.get_all_transactions
-    @invoice_items = engine.get_all_invoice_items
+    @merchants ||= engine.get_all_merchants
+    @items ||= engine.get_all_items
+    @invoices ||= engine.get_all_invoices
+    @transactions ||= engine.get_all_transactions
+    @invoice_items ||= engine.get_all_invoice_items
   end
 
   def get_merchant_ids(merchants)
@@ -21,18 +23,6 @@ class SalesAnalyst
       merchant.id
     end
   end
-
-  # def find_all_items_by_merchant_id(merchant_id)
-  #   items.find_all do |item_object|
-  #     item_object.merchant_id == merchant_id
-  #   end
-  # end
-
-  # def items_per_merchant
-  #   merchants.map do |merchant|
-  #     find_all_items_by_merchant_id(merchant.id).length
-  #   end
-  # end
 
   def average_items_per_merchant
     Compute.mean(engine.items_per_merchant.sum, engine.items_per_merchant.length)
@@ -116,26 +106,14 @@ class SalesAnalyst
 
   def average_invoices_per_day_standard_deviation
     average_invoices_per_day = Compute.mean(invoices.length, 7)
-    adder_counter = invoices_per_day.values.sum do |number_of_invoices|
+    adder_counter = engine.invoices_per_day.values.sum do |number_of_invoices|
       (number_of_invoices - average_invoices_per_day)**2
     end
     Math.sqrt(adder_counter.to_f / 6).round(2)
   end
 
-  def invoices_per_day
-    days = invoices.map do |invoice_object|
-      invoice_object.created_at.strftime('%A')
-    end
-    sorted_days = days.group_by do |day|
-      day
-    end
-    sorted_days.transform_values do |value|
-      value.length
-    end
-  end
-
   def top_days_by_invoice_count
-    days_hash = invoices_per_day.select do |key, value|
+    days_hash = engine.invoices_per_day.select do |key, value|
       value > average_invoices_per_day_standard_deviation + (invoices.length/7)
     end
     days_hash.keys
@@ -180,21 +158,20 @@ class SalesAnalyst
     end
   end
 
-  def invoice_total(invoice_id)
-    all_invoice_items = @invoice_items.find_all do |invoice_item|
-      invoice_item.invoice_id == invoice_id &&
-      invoice_paid_in_full?(invoice_item.invoice_id)
-    end
-
-    all_invoice_items.sum do |invoice_item|
-      (invoice_item.quantity * invoice_item.unit_price)
-    end
-  end
+  # def invoice_total(invoice_id)
+  #   all_invoice_items = @invoice_items.find_all do |invoice_item|
+  #     invoice_item.invoice_id == invoice_id &&
+  #     invoice_paid_in_full?(invoice_item.invoice_id)
+  #   end
+  #   all_invoice_items.sum do |invoice_item|
+  #     (invoice_item.quantity * invoice_item.unit_price)
+  #   end
+  # end
 
   def revenue_by_merchant(merchant_id)
     merchant_invoices = find_all_invoices_by_merchant_id(merchant_id)
     merchant_invoices.sum do |invoice|
-      invoice_total(invoice.id)
+      engine.invoice_total(invoice.id)
     end
   end
 
@@ -222,7 +199,7 @@ class SalesAnalyst
         invoice_id_matching_date += invoice.id
       end
       invoice_id_matching_date
-      invoices_total_by_date = invoice_total(invoice_id_matching_date)
+      invoices_total_by_date = engine.invoice_total(invoice_id_matching_date)
       return invoices_total_by_date
     end
   end
@@ -250,27 +227,14 @@ class SalesAnalyst
     end
   end
 
-  # def merchants_with_only_one_item
-  #   one_item_merchants = items_per_merchant_hash.select do |key, value|
-  #     value == 1
-  #   end
-  #   final = @merchants.select do |merchant|
-  #     one_item_merchants.keys.include?(merchant.id)
-  #   end
-  # end
-  #
-  # def items_per_merchant_hash
-  #   stripped_items ||= @items.map do |item| #if instance variable has been created, use it if not then create it
-  #     item.merchant_id
-  #   end
-  #   grouped_items = stripped_items.group_by do |item|
-  #     item
-  #   end
-  #   tallied_items = grouped_items.transform_values do |value|
-  #     value.length
-  #   end
-  #   tallied_items
-  # end
+  def merchants_with_only_one_item
+    one_item_merchants = items_per_merchant_hash.select do |key, value|
+      value == 1
+    end
+    final = @merchants.select do |merchant|
+      one_item_merchants.keys.include?(merchant.id)
+    end
+  end
 
   def merchants_with_only_one_item_registered_in_month(month)
     merchants_selling_only_one_item.find_all do |merchant|
