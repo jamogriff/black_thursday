@@ -3,7 +3,9 @@ require 'date'
 
 class SalesAnalyst
 
-  attr_reader :engine, :merchants, :items, :invoices, :transactions
+  attr_reader :engine, :merchants,
+              :items, :invoices,
+              :transactions
 
   def initialize(engine)
     @engine = engine
@@ -20,36 +22,36 @@ class SalesAnalyst
     end
   end
 
-  def find_all_items_by_merchant_id(merchant_id)
-    items.find_all do |item_object|
-      item_object.merchant_id == merchant_id
-    end
-  end
+  # def find_all_items_by_merchant_id(merchant_id)
+  #   items.find_all do |item_object|
+  #     item_object.merchant_id == merchant_id
+  #   end
+  # end
 
-  def items_per_merchant
-    merchants.map do |merchant|
-      find_all_items_by_merchant_id(merchant.id).length
-    end
-  end
+  # def items_per_merchant
+  #   merchants.map do |merchant|
+  #     find_all_items_by_merchant_id(merchant.id).length
+  #   end
+  # end
 
   def average_items_per_merchant
-    Compute.mean(items_per_merchant.sum, items_per_merchant.length)
+    Compute.mean(engine.items_per_merchant.sum, engine.items_per_merchant.length)
   end
 
   def average_items_per_merchant_standard_deviation
-    Compute.standard_deviation(items_per_merchant)
+    Compute.standard_deviation(engine.items_per_merchant)
   end
 
   def merchants_with_high_item_count
     mean = average_items_per_merchant
     greater_than_1sd = mean + average_items_per_merchant_standard_deviation
     merchants.find_all do |merchant|
-      find_all_items_by_merchant_id(merchant.id).length > greater_than_1sd
+      engine.find_all_items_by_merchant_id(merchant.id).length > greater_than_1sd
     end
   end
 
   def average_item_price_for_merchant(merchant_id)
-    merchant_items = find_all_items_by_merchant_id(merchant_id)
+    merchant_items = @engine.find_all_items_by_merchant_id(merchant_id)
     sum_of_prices = merchant_items.sum do |item_object|
       item_object.unit_price
     end
@@ -248,27 +250,27 @@ class SalesAnalyst
     end
   end
 
-  def merchants_with_only_one_item
-    one_item_merchants = items_per_merchant_hash.select do |key, value|
-      value == 1
-    end
-    final = @merchants.select do |merchant|
-      one_item_merchants.keys.include?(merchant.id)
-    end
-  end
-
-  def items_per_merchant_hash
-    stripped_items ||= @items.map do |item| #if instance variable has been created, use it if not then create it
-      item.merchant_id
-    end
-    grouped_items = stripped_items.group_by do |item|
-      item
-    end
-    tallied_items = grouped_items.transform_values do |value|
-      value.length
-    end
-    tallied_items
-  end
+  # def merchants_with_only_one_item
+  #   one_item_merchants = items_per_merchant_hash.select do |key, value|
+  #     value == 1
+  #   end
+  #   final = @merchants.select do |merchant|
+  #     one_item_merchants.keys.include?(merchant.id)
+  #   end
+  # end
+  #
+  # def items_per_merchant_hash
+  #   stripped_items ||= @items.map do |item| #if instance variable has been created, use it if not then create it
+  #     item.merchant_id
+  #   end
+  #   grouped_items = stripped_items.group_by do |item|
+  #     item
+  #   end
+  #   tallied_items = grouped_items.transform_values do |value|
+  #     value.length
+  #   end
+  #   tallied_items
+  # end
 
   def merchants_with_only_one_item_registered_in_month(month)
     merchants_selling_only_one_item.find_all do |merchant|
@@ -278,16 +280,8 @@ class SalesAnalyst
 
   def merchants_selling_only_one_item
     @merchants.find_all do |merchant|
-      merchants_items = find_all_items_by_merchant_id(merchant.id)
+      merchants_items = @engine.find_all_items_by_merchant_id(merchant.id)
       merchants_items.length == 1
     end
   end
 end
-
-#find item per merchant in sales engine? or merchant repo gets merchants with their items. (use self?)
-#memoization(sp?) iterating more than we need to means we should trim the iterations as much as possible. The first time we iterate it will
-#contatin the information and then we can reuse the iterated information. Example on items_per_merchant_hash
-
-
-#all methods on spec harness working, refactor, THEN blog post. Put blog post in readme
-#just how to I say in english how I would solve the issue.

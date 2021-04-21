@@ -49,4 +49,16 @@ class SalesEngine
   def get_all_transactions
     @transactions.array_of_objects
   end
+
+  def items_per_merchant
+    @merchants.array_of_objects.map do |merchant|
+      find_all_items_by_merchant_id(merchant.id).length
+    end
+  end
+
+  def find_all_items_by_merchant_id(merchant_id)
+    @items.array_of_objects.find_all do |item_object|
+      item_object.merchant_id == merchant_id
+    end
+  end
 end

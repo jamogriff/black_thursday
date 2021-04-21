@@ -33,10 +33,9 @@ RSpec.describe do
 
     it 'calculates average_items_per_merchant' do
       first_ten_merchants = sales_engine.merchants.array_of_objects[0..9]
-      allow(sales_analyst).to receive(:merchants) do
+      allow(sales_engine.merchants).to receive(:array_of_objects) do
         first_ten_merchants
       end
-      # Average of 2.5 was verified by searching fixture file with first 10 ID's
       expect(sales_analyst.average_items_per_merchant).to eq(2.5)
     end
 
@@ -208,7 +207,7 @@ RSpec.describe do
     end
 
     it "#merchants_with_only_one_item returns merchants with only one item" do
-      expected = sales_analyst.merchants_with_only_one_item
+      expected = sales_analyst.merchants_selling_only_one_item
 
       expect(expected.length).to eq 243
       expect(expected.first.class).to eq Merchant
