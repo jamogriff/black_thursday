@@ -176,6 +176,7 @@ class SalesAnalyst
     end
   end
 
+  # What is this alchemy?
   def top_revenue_earners(count=20)
     merchants_by_revenue = @merchants.reduce({}) do |merchants_by_revenue, merchant|
       merchants_by_revenue[merchant] = revenue_by_merchant(merchant.id)
@@ -205,14 +206,8 @@ class SalesAnalyst
     end
   end
 
-  def find_transactions_by_invoice_id(invoice_id)
-    transactions.find_all do |transaction|
-      transaction.invoice_id == invoice_id
-    end
-  end
-
   def check_pending_invoice(invoice)
-    transactions = find_transactions_by_invoice_id(invoice.id)
+    transactions = engine.find_transactions_by_invoice_id(invoice.id)
     failed_transactions = transactions.none? do |transaction|
       transaction.result == :success
     end
