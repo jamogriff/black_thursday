@@ -5,12 +5,12 @@ require 'time'
 
 class InvoiceItem
   attr_reader :created_at
-attr_accessor :id,
-              :item_id,
-              :invoice_id,
-              :quantity,
-              :unit_price,
-              :updated_at
+  attr_accessor :id,
+                :item_id,
+                :invoice_id,
+                :quantity,
+                :unit_price,
+                :updated_at
 
   def initialize(info_hash)
     @id = info_hash[:id].to_i

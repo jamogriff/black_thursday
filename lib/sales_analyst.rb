@@ -13,7 +13,7 @@ class SalesAnalyst
     @transactions = engine.get_all_transactions
     @invoice_items = engine.get_all_invoice_items
   end
-  
+
   def get_merchant_ids(merchants)
     merchants.map do |merchant|
       merchant.id

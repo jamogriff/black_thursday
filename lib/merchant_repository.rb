@@ -8,7 +8,7 @@ class MerchantRepository < Repository
   end
 
   def inspect
-  "#<#{self.class} #{@array_of_objects.size} rows>"
+    "#<#{self.class} #{@array_of_objects.size} rows>"
   end
 
   def find_by_name(name)
@@ -35,5 +35,4 @@ class MerchantRepository < Repository
       nil
     end
   end
-
 end
