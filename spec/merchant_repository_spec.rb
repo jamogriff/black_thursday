@@ -4,16 +4,18 @@ require_relative '../lib/merchant_repository'
 
 RSpec.describe MerchantRepository do
 
+  sales_engine = SalesEngine.from_csv({
+    :items     => "./data/items.csv",
+    :merchants => "./data/merchants.csv",
+    :invoices => "./data/invoices.csv",
+    :customers => "./data/customers.csv",
+    :invoice_items => "./data/invoice_items.csv",
+    :transactions => "./data/transactions.csv"
+    })
+
+  merch_rep = sales_engine.merchants
+
   describe 'initialization' do
-    sales_engine = SalesEngine.from_csv({
-                                          :items     => "./data/items.csv",
-                                          :merchants => "./data/merchants.csv",
-                                          :invoices => "./data/invoices.csv",
-                                          :customers => "./data/customers.csv",
-                                          :invoice_items => "./data/invoice_items.csv",
-                                          :transactions => "./data/transactions.csv"
-                                          })
-    merch_rep = sales_engine.merchants
 
     it 'exists' do
       expect(merch_rep).to be_instance_of(MerchantRepository)
@@ -28,40 +30,19 @@ RSpec.describe MerchantRepository do
     end
   end
 
-  describe 'database functionality' do
-    sales_engine = SalesEngine.from_csv({
-                                          :items     => "./data/items.csv",
-                                          :merchants => "./data/merchants.csv",
-                                          :invoices => "./data/invoices.csv",
-                                          :customers => "./data/customers.csv",
-                                          :invoice_items => "./data/invoice_items.csv",
-                                          :transactions => "./data/transactions.csv"
-                                          })
-    merch_rep = sales_engine.merchants
+  describe 'parent class methods' do
 
-#REPEATED IN REPOSITORY TESTS
     it '#all returns array of all merchants' do
       merchant_count = merch_rep.array_of_objects.count
       expect(merch_rep.all.count).to eq(merchant_count)
     end
 
-#REPEATED IN REPOSITORY TESTS
-    it 'can find by id' do
+    it '#find_by_id can find merchant by id' do
       expect(merch_rep.find_by_id(500000)).to eq(nil)
       expect(merch_rep.find_by_id(12334105).name).to eq("Shopin1901")
     end
 
-    it 'can find by name' do
-      expect(merch_rep.find_by_name("Candisart").id).to eq(12334112)
-      expect(merch_rep.find_by_name("candISart").id).to eq(12334112)
-    end
-
-    it 'find all by name' do
-      expect(merch_rep.find_all_by_name("Giovani")).to eq([])
-      expect(merch_rep.find_all_by_name("Candi").count).to eq(1)
-    end
-
-    it 'creates new merchants' do
+    it '#create creates new merchants' do
       attributes = {
                     name: "Turing School of Software and Design",
                     created_at: "2000-03-28"
@@ -73,22 +54,34 @@ RSpec.describe MerchantRepository do
       expect(merch_rep.all.last.name).to eq(expected)
     end
 
-    it 'can update existing merchant' do
+    it '#delete can delete merchant' do
+      merch_rep.delete(12334105)
+      targeted_merchant = merch_rep.find_by_id(12334105)
+      expect(targeted_merchant).to eq(nil)
+    end
+  end
+
+  describe 'instance methods' do
+
+    it '#find_by_name can find by name' do
+      expect(merch_rep.find_by_name("Candisart").id).to eq(12334112)
+      expect(merch_rep.find_by_name("candISart").id).to eq(12334112)
+    end
+
+    it '#find_all_by_name can find all by name' do
+      expect(merch_rep.find_all_by_name("Giovani")).to eq([])
+      expect(merch_rep.find_all_by_name("Candi").count).to eq(1)
+    end
+
+    it '#update can update existing merchant' do
       attributes = {
                     name: "TSSD",
                     created_at: "2000-03-28"
                     }
       merch_rep.update(12337412, attributes)
-      expected = merch_rep.find_by_id(12337412)
-      expect(expected.name).to eq "TSSD"
-      expected = merch_rep.find_by_name("Turing School of Software and Design")
-    expect(expected).to eq nil
-    end
 
-    it 'can delete merchant' do
-      merch_rep.delete(12334112)
-      targeted_merchant = merch_rep.find_by_id(12334112)
-      expect(targeted_merchant).to eq(nil)
+      expect(merch_rep.find_by_id(12337412).name).to eq "TSSD"
+      expect(merch_rep.find_by_name("Turing School of Software and Design")).to eq nil
     end
   end
 end
