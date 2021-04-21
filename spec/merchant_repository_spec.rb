@@ -15,7 +15,6 @@ RSpec.describe MerchantRepository do
   merch_rep = sales_engine.merchants
 
   describe 'initialization' do
-
     it 'exists' do
       expect(merch_rep).to be_instance_of(MerchantRepository)
     end
@@ -30,7 +29,6 @@ RSpec.describe MerchantRepository do
   end
 
   describe 'parent class methods' do
-
     it '#all returns array of all merchants' do
       merchant_count = merch_rep.array_of_objects.count
       expect(merch_rep.all.count).to eq(merchant_count)
@@ -61,7 +59,6 @@ RSpec.describe MerchantRepository do
   end
 
   describe 'instance methods' do
-
     it '#find_by_name can find by name' do
       expect(merch_rep.find_by_name("Candisart").id).to eq(12334112)
       expect(merch_rep.find_by_name("candISart").id).to eq(12334112)

@@ -14,7 +14,6 @@ RSpec.describe TransactionRepository do
     transaction_repo = sales_engine.transactions
 
   describe 'initialization' do
-
     it 'exists' do
       expect(transaction_repo).to be_instance_of(TransactionRepository)
     end
@@ -25,7 +24,6 @@ RSpec.describe TransactionRepository do
   end
 
   describe 'parent class methods' do
-
     it '#all returns array of all transactions' do
       expect(transaction_repo.all.length).to eq(4985)
     end
@@ -62,7 +60,6 @@ RSpec.describe TransactionRepository do
   end
 
   describe 'instance methods' do
-
     it '#find_all_by_invoice_id returns array of transactions with matching invoice id' do
       test_id = 2179
       empty_id = 1000

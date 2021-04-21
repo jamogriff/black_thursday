@@ -16,7 +16,6 @@ RSpec.describe ItemRepository do
   item_repo = sales_engine.items
 
   describe 'initialization' do
-
     it 'exists' do
       expect(item_repo).to be_instance_of(ItemRepository)
     end
@@ -27,7 +26,6 @@ RSpec.describe ItemRepository do
   end
 
   describe 'parent class methods' do
-
     it '#all returns array of all items' do
       expect(item_repo.all.count).to eq(1367)
     end
@@ -74,7 +72,6 @@ RSpec.describe ItemRepository do
   end
 
   describe 'instance methods' do
-
     it '#find_by_name returns instance of item by matching name' do
       name = "Puppy blankie"
 

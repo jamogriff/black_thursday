@@ -14,7 +14,6 @@ RSpec.describe InvoiceRepository do
   invoice_repo = sales_engine.invoices
 
   describe 'initialization' do
-
     it 'exists' do
       expect(invoice_repo).to be_instance_of(InvoiceRepository)
     end
@@ -25,7 +24,6 @@ RSpec.describe InvoiceRepository do
   end
 
   describe 'parent class methods' do
-
     it '#all returns array of all invoices' do
       expect(invoice_repo.all.length).to eq(4985)
     end
@@ -62,7 +60,6 @@ RSpec.describe InvoiceRepository do
   end
 
   describe 'instance methods' do
-
     it '#find_all_by_customer_id returns array of invoices with customer id' do
       real_customer_id = 300
       fake_customer_id = 10000

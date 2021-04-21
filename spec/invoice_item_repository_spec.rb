@@ -15,7 +15,6 @@ RSpec.describe InvoiceItemRepository do
   invoice_item_repo = sales_engine.invoice_items
 
   describe 'initialization' do
-
     it 'exists' do
       expect(invoice_item_repo).to be_instance_of(InvoiceItemRepository)
     end
@@ -26,7 +25,6 @@ RSpec.describe InvoiceItemRepository do
   end
 
   describe 'parent class methods' do
-
     it '#all returns array of all invoice items' do
       expect(invoice_item_repo.all.count).to eq(21830)
     end
@@ -66,7 +64,6 @@ RSpec.describe InvoiceItemRepository do
   end
 
   describe 'instance methods' do
-
     it '#find_all_by_item_id returns correct invoice id' do
       expect(invoice_item_repo.find_all_by_item_id(263408101).length).to eq(11)
       expect(invoice_item_repo.find_all_by_item_id(263408101).first.class).to eq(InvoiceItem)
