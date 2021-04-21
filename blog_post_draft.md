@@ -9,3 +9,6 @@
 
 ## best_item_for_merchant(merchant_id)
 
+sales_analyst.best_item_for_merchant(merchant_id) #=> item (in terms of revenue generated)
+The first thing the we would do to figure out best item for merchant is pass in a merchant id. This would find all the invoices belonging to that merchant. We would iterate through that invoice data set, and check that its corresponding invoice was successful. If the invoice is successful, then we would look at all of the invoice items and create a hash that uses their item id as the hash key and the quantity as the value. We would also look into item repository and pull out the unit price and add that information to the corresponding item id key. This would create a nested hash. The outermost key would be the item id and the value would consist of another hash with two key value pairs. One would be its quantity and the other would be unit price. We would then make a helper method that looks at all of the data and math everything up and provide us with a final "best" number. This number would be found by using max_by enumerable. THEN BAM, DONE. 
+
