@@ -1,6 +1,5 @@
 require_relative '../lib/sales_engine'
 require_relative '../lib/item_repository'
-require_relative '../lib/item'
 require 'bigdecimal/util'
 
 RSpec.describe ItemRepository do
@@ -13,7 +12,7 @@ RSpec.describe ItemRepository do
     :invoice_items => "./data/invoice_items.csv",
     :transactions => "./data/transactions.csv"
     })
-    
+
   item_repo = sales_engine.items
 
   describe 'initialization' do

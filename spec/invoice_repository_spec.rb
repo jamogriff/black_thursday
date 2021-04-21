@@ -1,10 +1,5 @@
 require_relative '../lib/sales_engine'
 require_relative '../lib/invoice_repository'
-require_relative '../lib/merchant'
-require_relative '../lib/merchant_repository'
-require_relative '../lib/item_repository'
-require_relative '../lib/item'
-require 'bigdecimal/util'
 
 RSpec.describe InvoiceRepository do
   sales_engine = SalesEngine.from_csv({

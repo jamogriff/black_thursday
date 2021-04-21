@@ -1,5 +1,4 @@
 require_relative '../lib/sales_engine'
-require_relative '../lib/merchant'
 require_relative '../lib/merchant_repository'
 
 RSpec.describe MerchantRepository do
