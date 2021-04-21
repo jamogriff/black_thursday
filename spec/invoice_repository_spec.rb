@@ -3,13 +3,13 @@ require_relative '../lib/invoice_repository'
 
 RSpec.describe InvoiceRepository do
   sales_engine = SalesEngine.from_csv({
-    :items     => "./data/items.csv",
-    :merchants => "./data/merchants.csv",
-    :invoices => "./data/invoices.csv",
-    :customers => "./data/customers.csv",
-    :invoice_items => "./data/invoice_items.csv",
-    :transactions => "./data/transactions.csv"
-    })
+                                        :items     => "./data/items.csv",
+                                        :merchants => "./data/merchants.csv",
+                                        :invoices => "./data/invoices.csv",
+                                        :customers => "./data/customers.csv",
+                                        :invoice_items => "./data/invoice_items.csv",
+                                        :transactions => "./data/transactions.csv"
+                                        })
 
   invoice_repo = sales_engine.invoices
 

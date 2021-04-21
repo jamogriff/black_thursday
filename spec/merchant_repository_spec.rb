@@ -4,13 +4,13 @@ require_relative '../lib/merchant_repository'
 RSpec.describe MerchantRepository do
 
   sales_engine = SalesEngine.from_csv({
-    :items     => "./data/items.csv",
-    :merchants => "./data/merchants.csv",
-    :invoices => "./data/invoices.csv",
-    :customers => "./data/customers.csv",
-    :invoice_items => "./data/invoice_items.csv",
-    :transactions => "./data/transactions.csv"
-    })
+                                        :items     => "./data/items.csv",
+                                        :merchants => "./data/merchants.csv",
+                                        :invoices => "./data/invoices.csv",
+                                        :customers => "./data/customers.csv",
+                                        :invoice_items => "./data/invoice_items.csv",
+                                        :transactions => "./data/transactions.csv"
+                                        })
 
   merch_rep = sales_engine.merchants
 
