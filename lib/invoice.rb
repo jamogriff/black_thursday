@@ -2,7 +2,6 @@ class Invoice
   attr_reader :customer_id,
               :merchant_id,
               :created_at
-
   attr_accessor :id,
                 :status,
                 :updated_at
@@ -23,5 +22,4 @@ class Invoice
       Time.parse(time)
     end
   end
-
 end

@@ -18,7 +18,4 @@ class Compute
     end
     Math.sqrt(adder_counter.to_f / (array_of_numbers.length - 1)).round(2)
   end
-
 end
-
-#MAKE TESTS! 

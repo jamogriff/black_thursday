@@ -11,7 +11,7 @@ class Repository
   end
 
   def inspect
-  "#<#{self.class} #{@array_of_objects.size} rows>"
+    "#<#{self.class} #{@array_of_objects.size} rows>"
   end
 
   def parse_csv(path)

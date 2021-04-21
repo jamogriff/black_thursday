@@ -10,7 +10,7 @@ class ItemRepository < Repository
   end
 
   def inspect
-  "#<#{self.class} #{@array_of_objects.size} rows>"
+    "#<#{self.class} #{@array_of_objects.size} rows>"
   end
 
   def find_by_name(name)
@@ -52,5 +52,4 @@ class ItemRepository < Repository
       target.updated_at = Time.now
     end
   end
-
 end
