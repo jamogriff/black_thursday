@@ -26,7 +26,6 @@ attr_accessor :id,
     (@unit_price.to_f).round(4)
   end
 
-
   def time_check(time)
     if time.class == Time
       time
@@ -34,5 +33,4 @@ attr_accessor :id,
       Time.parse(time)
     end
   end
-
 end
