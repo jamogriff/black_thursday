@@ -1,14 +1,10 @@
 require_relative '../lib/sales_engine'
-# require_relative '../lib/item_repository'
-# require_relative '../lib/merchant_repository'
-# require_relative '../lib/sales_analyst'
-# require_relative '../lib/invoice_item_repository'
-# require_relative '../lib/invoice'
 require 'bigdecimal/util'
 
 RSpec.describe do
 
   describe 'initialize' do
+    start = Time.now
     sales_engine = SalesEngine.from_csv({
                                         :items     => "./spec/fixtures/items_fixtures.csv",
                                         :merchants => "./spec/fixtures/merchants_fixtures.csv",
@@ -75,15 +71,14 @@ RSpec.describe do
     end
 
     it 'has special golden items for funny reasons' do
-      first_20_items = sales_engine.items.array_of_objects[0..19]
-      allow(sales_analyst).to receive(:items) do
-        first_20_items
-      end
       expect(sales_analyst.golden_items.length).to eq(1)
     end
+
+    puts "#{Time.now - start} seconds to run first SalesAnalyst block."
   end
 
   describe 'iteration 2 functionality' do
+    start = Time.now
     sales_engine = SalesEngine.from_csv({
                                         :items     => "./spec/fixtures/items_fixtures.csv",
                                         :merchants => "./spec/fixtures/merchants_fixtures.csv",
@@ -122,9 +117,25 @@ RSpec.describe do
       expect(sales_analyst.bottom_merchants_by_invoice_count.length).to eq(1)
       expect(sales_analyst.bottom_merchants_by_invoice_count.first.class).to eq(Merchant)
     end
+
+    it '#invoice_paid_in_full? returns true if invoice is paid in full' do
+      expect(sales_analyst.invoice_paid_in_full?(1)).to eq(true)
+      expect(sales_analyst.invoice_paid_in_full?(200)).to eq(true)
+      expect(sales_analyst.invoice_paid_in_full?(203)).to eq(false)
+      expect(sales_analyst.invoice_paid_in_full?(204)).to eq(false)
+    end
+
+    it '#invoice_total returns total dollar amount of invoice by id IF the invoice is paid in full' do
+      expect(sales_analyst.invoice_total(1)).to eq(21067.77)
+      expect(sales_analyst.invoice_total(1).class).to eq(BigDecimal)
+      expect(sales_analyst.invoice_total(2)).to eq(5289.13)
+    end
+
+    puts "#{Time.now - start} seconds to run second SalesAnalyst block."
   end
 
   describe 'iteration 4 functionality' do
+    start = Time.now
     sales_engine = SalesEngine.from_csv({
                                         :items     => "./data/items.csv",                                        :merchants => "./data/merchants.csv",
                                         :invoices => "./data/invoices.csv",
@@ -165,7 +176,7 @@ RSpec.describe do
     end
 
     it "#merchants_with_only_one_item returns merchants with only one item" do
-      expected = sales_analyst.merchants_selling_only_one_item
+      expected = sales_analyst.merchants_with_only_one_item
       expect(expected.length).to eq 243
       expect(expected.first.class).to eq Merchant
     end
@@ -176,5 +187,6 @@ RSpec.describe do
       expect(march_expected.length).to eq 21
       expect(expected.length).to eq 18
     end
+    puts "#{Time.now - start} seconds to run last SalesAnalyst block."
   end
 end

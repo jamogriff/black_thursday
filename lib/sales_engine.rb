@@ -62,6 +62,12 @@ class SalesEngine
     end
   end
 
+  def price_per_item
+    items.array_of_objects.map do |item_object|
+      item_object.unit_price
+    end
+  end
+
   def invoices_per_day
     days = @invoices.array_of_objects.map do |invoice_object|
       invoice_object.created_at.strftime('%A')
@@ -74,26 +80,26 @@ class SalesEngine
     end
   end
 
-  def invoice_total(invoice_id)
-    all_invoice_items = @invoice_items.array_of_objects.find_all do |invoice_item|
-      invoice_item.invoice_id == invoice_id &&
-      invoice_paid_in_full?(invoice_item.invoice_id)
-    end
-    all_invoice_items.sum do |invoice_item|
-      (invoice_item.quantity * invoice_item.unit_price)
-    end
-  end
-
-  def invoice_paid_in_full?(invoice_id)
-    all_transactions = @transactions.array_of_objects.find_all do |transaction|
-      transaction.invoice_id == invoice_id
-    end
-    if all_transactions.length != 0
-      all_transactions.any? do |transaction|
-        transaction.result == :success
-      end
-    else
-      false
-    end
-  end
+  # def invoice_total(invoice_id)
+  #   all_invoice_items = @invoice_items.array_of_objects.find_all do |invoice_item|
+  #     invoice_item.invoice_id == invoice_id &&
+  #     invoice_paid_in_full?(invoice_item.invoice_id)
+  #   end
+  #   all_invoice_items.sum do |invoice_item|
+  #     (invoice_item.quantity * invoice_item.unit_price)
+  #   end
+  # end
+  #
+  # def invoice_paid_in_full?(invoice_id)
+  #   all_transactions = @transactions.array_of_objects.find_all do |transaction|
+  #     transaction.invoice_id == invoice_id
+  #   end
+  #   if all_transactions.length != 0
+  #     all_transactions.any? do |transaction|
+  #       transaction.result == :success
+  #     end
+  #   else
+  #     false
+  #   end
+  # end
 end

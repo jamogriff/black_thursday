@@ -7,7 +7,8 @@ class SalesAnalyst
               :merchants,
               :items,
               :invoices,
-              :transactions
+              :transactions,
+              :invoice_items
 
   def initialize(engine)
     @engine = engine
@@ -65,14 +66,14 @@ class SalesAnalyst
     end
   end
 
-  def price_per_item
-    test = items.map do |item_object|
-      item_object.unit_price
-    end
-  end
+  # def price_per_item
+  #   test = items.map do |item_object|
+  #     item_object.unit_price
+  #   end
+  # end
 
   def average_price_per_item_standard_deviation
-    Compute.standard_deviation(price_per_item)
+    Compute.standard_deviation(engine.price_per_item)
   end
 
   def golden_items
@@ -129,6 +130,29 @@ class SalesAnalyst
     (sorted_invoices.length/@invoices.length.to_f*100).round(2)
   end
 
+  def invoice_total(invoice_id)
+    all_invoice_items = invoice_items.find_all do |invoice_item|
+      invoice_item.invoice_id == invoice_id &&
+      invoice_paid_in_full?(invoice_item.invoice_id)
+    end
+    all_invoice_items.sum do |invoice_item|
+      (invoice_item.quantity * invoice_item.unit_price)
+    end
+  end
+
+  def invoice_paid_in_full?(invoice_id)
+    all_transactions = transactions.find_all do |transaction|
+      transaction.invoice_id == invoice_id
+    end
+    if all_transactions.length != 0
+      all_transactions.any? do |transaction|
+        transaction.result == :success
+      end
+    else
+      false
+    end
+  end
+
   def top_merchants_by_invoice_count
     mean = average_invoices_per_merchant
     upper_bound = mean + average_invoices_per_merchant_standard_deviation * 2
@@ -148,7 +172,7 @@ class SalesAnalyst
   def revenue_by_merchant(merchant_id)
     merchant_invoices = find_all_invoices_by_merchant_id(merchant_id)
     merchant_invoices.sum do |invoice|
-      engine.invoice_total(invoice.id)
+      invoice_total(invoice.id)
     end
   end
 
@@ -176,7 +200,7 @@ class SalesAnalyst
         invoice_id_matching_date += invoice.id
       end
       invoice_id_matching_date
-      invoices_total_by_date = engine.invoice_total(invoice_id_matching_date)
+      invoices_total_by_date = invoice_total(invoice_id_matching_date)
       return invoices_total_by_date
     end
   end
@@ -204,22 +228,13 @@ class SalesAnalyst
     end
   end
 
-  # def merchants_with_only_one_item
-  #   one_item_merchants = items_per_merchant_hash.select do |key, value|
-  #     value == 1
-  #   end
-  #   final = @merchants.select do |merchant|
-  #     one_item_merchants.keys.include?(merchant.id)
-  #   end
-  # end
-
   def merchants_with_only_one_item_registered_in_month(month)
-    merchants_selling_only_one_item.find_all do |merchant|
+    merchants_with_only_one_item.find_all do |merchant|
       merchant.created_at.strftime('%B') == month
     end
   end
 
-  def merchants_selling_only_one_item
+  def merchants_with_only_one_item
     @merchants.find_all do |merchant|
       @engine.find_all_items_by_merchant_id(merchant.id).length == 1
     end
