@@ -4,7 +4,7 @@ require_relative '../lib/item'
 require 'bigdecimal/util'
 
 RSpec.describe ItemRepository do
-  
+
   describe 'initialization' do
     sales_engine = SalesEngine.from_csv({
                                           :items     => "./data/items.csv",
@@ -70,7 +70,7 @@ RSpec.describe ItemRepository do
       expect(item_repo.all.last.name).to eq("Pencil")
     end
 
-    it '#creates test for new id to be incremented by one' do
+    it '#create makes a new id, incremented by one' do
       expect(item_repo.all.last.id).to eq(263567475)
     end
 
@@ -81,7 +81,7 @@ RSpec.describe ItemRepository do
     end
   end
 
-  describe 'isntance methods' do
+  describe 'instance methods' do
     sales_engine = SalesEngine.from_csv({
                                           :items     => "./data/items.csv",
                                           :merchants => "./data/merchants.csv",
@@ -92,39 +92,39 @@ RSpec.describe ItemRepository do
                                           })
     item_repo = sales_engine.items
 
-    it 'find_by_name returns instance of item by matching name' do
+    it '#find_by_name returns instance of item by matching name' do
       name = "Puppy blankie"
 
       expect(item_repo.find_by_name(name).name).to eq("Puppy blankie")
       expect(item_repo.find_by_name(name).id).to eq(263538760)
     end
 
-    it 'find_by_name handles case insensitive search' do
+    it '#find_by_name handles case insensitive search' do
       name = "puppy blankie"
 
       expect(item_repo.find_by_name(name).name).to eq("Puppy blankie")
     end
 
-    it 'find_by_name returns nil if no name match' do
+    it '#find_by_name returns nil if no name match' do
       name = "Sales Engine"
 
       expect(item_repo.find_by_name(name)).to eq(nil)
     end
 
-    it 'find_all_with_description returns array by matching descriptions' do
+    it '#find_all_with_description returns array by matching descriptions' do
       description = "A large Yeti of sorts, casually devours a cow as the others watch numbly."
 
       expect(item_repo.find_all_with_description(description)[0].description).to eq(description)
       expect(item_repo.find_all_with_description(description)[0].id).to eq(263550472)
     end
 
-    it 'find_all_with_description returns empty array if no match' do
+    it '#find_all_with_description returns empty array if no match' do
       description = "SalesEngine"
 
       expect(item_repo.find_all_with_description(description)).to eq([])
     end
 
-    it 'find_all_with_description handles case insensitive search' do
+    it '#find_all_with_description handles case insensitive search' do
       description = "a large yeti of sorts, casually devours a cow as the others watch numbly."
 
       expect(item_repo.find_all_with_description(description)[0].description).to eq("A large Yeti of sorts, casually devours a cow as the others watch numbly.")
@@ -143,13 +143,13 @@ RSpec.describe ItemRepository do
       expect(item_repo.find_all_by_price(price)).to eq([])
     end
 
-    it  '#find_all_by_price_in_range returns array of items with price in range' do
+    it '#find_all_by_price_in_range returns array of items with price in range' do
       range = (1000.00..1500.00)
 
       expect(item_repo.find_all_by_price_in_range(range).length).to eq(19)
     end
 
-    it  '#find_all_by_price_in_range returns [] if no prices in range' do
+    it '#find_all_by_price_in_range returns [] if no prices in range' do
       range = (1000000.00..1500000.00)
 
       expect(item_repo.find_all_by_price_in_range(range)).to eq([])
@@ -180,6 +180,7 @@ RSpec.describe ItemRepository do
 
       item_repo.update(263567474, attributes)
       expected = item_repo.find_by_id(263567474)
+      
       expect(expected.name).to eq("Pencil")
       expect(expected.updated_at).not_to eq(expected.created_at)
     end
