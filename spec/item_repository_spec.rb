@@ -5,16 +5,17 @@ require 'bigdecimal/util'
 
 RSpec.describe ItemRepository do
 
+  sales_engine = SalesEngine.from_csv({
+    :items     => "./data/items.csv",
+    :merchants => "./data/merchants.csv",
+    :invoices => "./data/invoices.csv",
+    :customers => "./data/customers.csv",
+    :invoice_items => "./data/invoice_items.csv",
+    :transactions => "./data/transactions.csv"
+    })
+  item_repo = sales_engine.items
+
   describe 'initialization' do
-    sales_engine = SalesEngine.from_csv({
-                                          :items     => "./data/items.csv",
-                                          :merchants => "./data/merchants.csv",
-                                          :invoices => "./data/invoices.csv",
-                                          :customers => "./data/customers.csv",
-                                          :invoice_items => "./data/invoice_items.csv",
-                                          :transactions => "./data/transactions.csv"
-                                          })
-    item_repo = sales_engine.items
 
     it 'exists' do
       expect(item_repo).to be_instance_of(ItemRepository)
@@ -26,15 +27,6 @@ RSpec.describe ItemRepository do
   end
 
   describe 'parent class methods' do
-    sales_engine = SalesEngine.from_csv({
-                                          :items     => "./data/items.csv",
-                                          :merchants => "./data/merchants.csv",
-                                          :invoices => "./data/invoices.csv",
-                                          :customers => "./data/customers.csv",
-                                          :invoice_items => "./data/invoice_items.csv",
-                                          :transactions => "./data/transactions.csv"
-                                          })
-    item_repo = sales_engine.items
 
     it '#all returns array of all items' do
       expect(item_repo.all.count).to eq(1367)
@@ -82,15 +74,6 @@ RSpec.describe ItemRepository do
   end
 
   describe 'instance methods' do
-    sales_engine = SalesEngine.from_csv({
-                                          :items     => "./data/items.csv",
-                                          :merchants => "./data/merchants.csv",
-                                          :invoices => "./data/invoices.csv",
-                                          :customers => "./data/customers.csv",
-                                          :invoice_items => "./data/invoice_items.csv",
-                                          :transactions => "./data/transactions.csv"
-                                          })
-    item_repo = sales_engine.items
 
     it '#find_by_name returns instance of item by matching name' do
       name = "Puppy blankie"
@@ -178,9 +161,9 @@ RSpec.describe ItemRepository do
                        :merchant_id => 2
                      }
 
-      item_repo.update(263567474, attributes)
-      expected = item_repo.find_by_id(263567474)
-      
+      item_repo.update(263538760, attributes)
+      expected = item_repo.find_by_id(263538760)
+
       expect(expected.name).to eq("Pencil")
       expect(expected.updated_at).not_to eq(expected.created_at)
     end
