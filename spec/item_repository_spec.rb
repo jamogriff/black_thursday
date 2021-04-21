@@ -13,6 +13,7 @@ RSpec.describe ItemRepository do
     :invoice_items => "./data/invoice_items.csv",
     :transactions => "./data/transactions.csv"
     })
+    
   item_repo = sales_engine.items
 
   describe 'initialization' do
