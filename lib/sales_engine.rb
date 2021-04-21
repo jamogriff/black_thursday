@@ -85,4 +85,17 @@ class SalesEngine
       value.length
     end
   end
+
+  def find_all_invoices_by_merchant_id(merchant_id)
+    @invoices.array_of_objects.find_all do |invoice|
+      invoice.merchant_id == merchant_id
+    end
+  end
+
+  def invoices_per_merchant
+    @merchants.array_of_objects.map do |merchant|
+      find_all_invoices_by_merchant_id(merchant.id).length
+    end
+  end
+
 end

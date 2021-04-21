@@ -41,13 +41,16 @@ class SalesAnalyst
     end
   end
 
-  def average_item_price_for_merchant(merchant_id)
-    merchant_items = @engine.find_all_items_by_merchant_id(merchant_id)
-    sum_of_prices = merchant_items.sum do |item_object|
+  def total_item_price(items)
+    items.sum do |item_object|
       item_object.unit_price
     end
+  end
+
+  def average_item_price_for_merchant(merchant_id)
+    merchant_items = @engine.find_all_items_by_merchant_id(merchant_id)
     if merchant_items.length != 0
-      Compute.mean(sum_of_prices, merchant_items.length)
+      Compute.mean(total_item_price(merchant_items), merchant_items.length)
     else
       0
     end
@@ -60,24 +63,12 @@ class SalesAnalyst
     Compute.mean(items_sum, merchants.length)
   end
 
-  def total_item_price
-    items.sum do |item_object|
-      item_object.unit_price
-    end
-  end
-
-  # def price_per_item
-  #   test = items.map do |item_object|
-  #     item_object.unit_price
-  #   end
-  # end
-
   def average_price_per_item_standard_deviation
     Compute.standard_deviation(engine.price_per_item)
   end
 
   def golden_items
-    mean = Compute.mean(total_item_price, items.length)
+    mean = Compute.mean(total_item_price(items), items.length)
     two_sd = average_price_per_item_standard_deviation * 2
     greater_than_2sd = mean + two_sd
     items.find_all do |item_object|
@@ -86,31 +77,20 @@ class SalesAnalyst
   end
 
   def average_invoices_per_merchant
-    Compute.mean(invoices_per_merchant.sum, invoices_per_merchant.length)
-  end
-
-  def find_all_invoices_by_merchant_id(merchant_id)
-    invoices.find_all do |invoice|
-      invoice.merchant_id == merchant_id
-    end
-  end
-
-  def invoices_per_merchant
-    merchants.map do |merchant|
-      find_all_invoices_by_merchant_id(merchant.id).length
-    end
+    Compute.mean(engine.invoices_per_merchant.sum, engine.invoices_per_merchant.length)
   end
 
   def average_invoices_per_merchant_standard_deviation
-    Compute.standard_deviation(invoices_per_merchant)
+    Compute.standard_deviation(engine.invoices_per_merchant)
   end
 
   def average_invoices_per_day_standard_deviation
-    average_invoices_per_day = Compute.mean(invoices.length, 7)
-    adder_counter = engine.invoices_per_day.values.sum do |number_of_invoices|
-      (number_of_invoices - average_invoices_per_day)**2
-    end
-    Math.sqrt(adder_counter.to_f / 6).round(2)
+    Compute.standard_deviation(engine.invoices_per_day)
+    # average_invoices_per_day = Compute.mean(invoices.length, 7)
+    # adder_counter = engine.invoices_per_day.values.sum do |number_of_invoices|
+    #   (number_of_invoices - average_invoices_per_day)**2
+    # end
+    # Math.sqrt(adder_counter.to_f / 6).round(2)
   end
 
   def top_days_by_invoice_count
@@ -157,7 +137,7 @@ class SalesAnalyst
     mean = average_invoices_per_merchant
     upper_bound = mean + average_invoices_per_merchant_standard_deviation * 2
     merchants.find_all do |merchant|
-      find_all_invoices_by_merchant_id(merchant.id).length > upper_bound
+      engine.find_all_invoices_by_merchant_id(merchant.id).length > upper_bound
     end
   end
 
@@ -165,31 +145,30 @@ class SalesAnalyst
     mean = average_invoices_per_merchant
     lower_bound = mean - average_invoices_per_merchant_standard_deviation * 2
     merchants.find_all do |merchant|
-      find_all_invoices_by_merchant_id(merchant.id).length < lower_bound
+      engine.find_all_invoices_by_merchant_id(merchant.id).length < lower_bound
     end
   end
 
   def revenue_by_merchant(merchant_id)
-    merchant_invoices = find_all_invoices_by_merchant_id(merchant_id)
+    merchant_invoices = engine.find_all_invoices_by_merchant_id(merchant_id)
     merchant_invoices.sum do |invoice|
       invoice_total(invoice.id)
     end
   end
 
-  # What is this alchemy?
-  def top_revenue_earners(count=20)
+  def sorted_merchants_by_revenue
     merchants_by_revenue = @merchants.reduce({}) do |merchants_by_revenue, merchant|
       merchants_by_revenue[merchant] = revenue_by_merchant(merchant.id)
       merchants_by_revenue
     end
-
     merchants_by_revenue = merchants_by_revenue.sort_by do |merchant, revenue|
       revenue
     end.reverse!
+  end
 
-    top_merchants_with_totals = merchants_by_revenue.first(count)
-
-    top_merchants = top_merchants_with_totals.flat_map do |merchant_with_total|
+  def top_revenue_earners(count=20)
+    top_merchants_with_totals = sorted_merchants_by_revenue.first(count)
+    top_merchants_with_totals.flat_map do |merchant_with_total|
       merchant_with_total[0]
     end
   end
@@ -216,7 +195,7 @@ class SalesAnalyst
 
   def merchants_with_pending_invoices
     all_merchants = merchants.find_all do |merchant|
-      merchant_invoices = find_all_invoices_by_merchant_id(merchant.id)
+      merchant_invoices = engine.find_all_invoices_by_merchant_id(merchant.id)
       merchant_invoices.any? do |invoice|
         check_pending_invoice(invoice)
       end
