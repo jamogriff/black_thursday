@@ -1,6 +1,4 @@
 require_relative '../lib/sales_engine'
-require_relative '../lib/item_repository'
-require_relative '../lib/merchant_repository'
 require_relative '../lib/repository'
 
 RSpec.describe Repository do
@@ -70,21 +68,18 @@ RSpec.describe Repository do
   describe '#create' do
     csv_path = "./data/items.csv"
     repository = Repository.new(csv_path, Item)
-
     attributes = {
-                      :id          => 1,
-                      :name        => "Pencil",
-                      :description => "You can use it to write things",
-                      :unit_price  => "1099",
-                      :created_at  => Time.now,
-                      :updated_at  => Time.now,
-                      :merchant_id => 2
-                    }
-
+                  :id          => 1,
+                  :name        => "Pencil",
+                  :description => "You can use it to write things",
+                  :unit_price  => "1099",
+                  :created_at  => Time.now,
+                  :updated_at  => Time.now,
+                  :merchant_id => 2
+                  }
     repository.create(attributes, Item)
 
     it 'can create an item based on the attributes passed in' do
-
       expect(repository.all.count).to eq(1368)
       expect(repository.all.last).to be_an_instance_of(Item)
       expect(repository.all.last.name).to eq("Pencil")
@@ -95,7 +90,7 @@ RSpec.describe Repository do
     end
   end
 
-  describe `#delete` do
+  describe '#delete' do
     csv_path = "./data/items.csv"
     repository = Repository.new(csv_path, Item)
 
@@ -110,5 +105,4 @@ RSpec.describe Repository do
       expect(repository.delete(1234)).to eq(merchant1)
     end
   end
-
 end
